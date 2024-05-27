@@ -5,6 +5,8 @@
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.BIND_VPN_SERVICE"/>
+    <uses-permission android:minSdkVersion="34" android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />
     <application>
       <service
           android:name="com.github.blueboytm.flutter_v2ray.v2ray.services.V2rayProxyOnlyService"
@@ -13,8 +15,9 @@
 
       <service
           android:name="com.github.blueboytm.flutter_v2ray.v2ray.services.V2rayVPNService"
-          android:exported="false"
+          android:exported="true"
           android:permission="android.permission.BIND_VPN_SERVICE"
+          android:foregroundServiceType="dataSync"
           android:process=":RunSoLibV2RayDaemon">
           <intent-filter>
               <action android:name="android.net.VpnService" />
