@@ -7,6 +7,7 @@ import 'package:flutter_v2ray/url/trojan.dart';
 import 'package:flutter_v2ray/url/url.dart';
 import 'package:flutter_v2ray/url/vless.dart';
 import 'package:flutter_v2ray/url/vmess.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 import 'flutter_v2ray_platform_interface.dart';
 import 'model/v2ray_status.dart';
@@ -23,9 +24,21 @@ class FlutterV2ray {
   /// Request VPN service permission specifically for Android.
   Future<bool> requestPermission() async {
     if (Platform.isAndroid) {
+      requestNotificationPermissions();
       return await FlutterV2rayPlatform.instance.requestPermission();
     }
     return true;
+  }
+  Future<void> requestNotificationPermissions() async {
+    final PermissionStatus status = await Permission.notification.request();
+    if (status.isGranted) {
+      // Notification permissions granted
+    } else if (status.isDenied) {
+      // Notification permissions denied
+    } else if (status.isPermanentlyDenied) {
+      // Notification permissions permanently denied, open app settings
+      await openAppSettings();
+    }
   }
 
   /// You must initialize V2Ray before using it.
