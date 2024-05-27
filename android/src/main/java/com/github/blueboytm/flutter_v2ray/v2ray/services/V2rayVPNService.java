@@ -214,7 +214,16 @@ public class V2rayVPNService extends VpnService implements V2rayServicesListener
     public void onDestroy() {
         super.onDestroy();
     }
-
+    @SuppressLint("NewApi")
+    private fun grantNotificationPermission() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            ActivityCompat.requestPermissions(
+                    this,
+                    arrayOf(Manifest.permission.POST_NOTIFICATIONS),
+                    NOTIFICATION_PERMISSION_REQUEST_CODE
+            )
+        }
+    }
     @Override
     public void onRevoke() {
         stopAllProcess();
@@ -232,6 +241,10 @@ public class V2rayVPNService extends VpnService implements V2rayServicesListener
 
     @Override
     public void startService() {
+        if (!ServiceNotification.checkPermission()) {
+            grantNotificationPermission();
+            return ;
+        }
         setup();
     }
 
