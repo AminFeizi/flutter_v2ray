@@ -2,6 +2,7 @@ package com.github.blueboytm.flutter_v2ray.v2ray.core;
 
 import static com.github.blueboytm.flutter_v2ray.v2ray.utils.Utilities.getUserAssetsPath;
 
+import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -13,6 +14,7 @@ import android.os.Build;
 import android.os.CountDownTimer;
 import android.util.Log;
 
+import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 import androidx.core.app.NotificationCompat;
 
@@ -237,15 +239,6 @@ public final class V2rayCoreManager {
             countDownTimer.cancel();
         }
     }
-//
-//    private fun getNotificationManager(): NotificationManager? {
-//        if (mNotificationManager == null) {
-//            val service = serviceControl?.get()?.getService() ?: return null
-//            mNotificationManager =
-//                    service.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-//        }
-//        return mNotificationManager
-//    }
 
     private NotificationManager getNotificationManager() {
         if (mNotificationManager == null) {
@@ -262,9 +255,9 @@ public final class V2rayCoreManager {
     private String createNotificationChannelID(final String Application_name) {
         String notification_channel_id = "DEV7_DEV_V_E_CH_ID";
         NotificationChannel notificationChannel = new NotificationChannel(
-                notification_channel_id, Application_name + " Background Service", NotificationManager.IMPORTANCE_DEFAULT);
+                notification_channel_id, Application_name + " Background Service", NotificationManager.IMPORTANCE_LOW);
         notificationChannel.setLightColor(Color.BLUE);
-        notificationChannel.setImportance(NotificationManager.IMPORTANCE_DEFAULT);
+        notificationChannel.setImportance(NotificationManager.IMPORTANCE_LOW);
         Objects.requireNonNull(getNotificationManager()).createNotificationChannel(notificationChannel);
         return notification_channel_id;
     }
@@ -291,14 +284,23 @@ public final class V2rayCoreManager {
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
             notificationChannelID = createNotificationChannelID(v2rayConfig.APPLICATION_NAME);
         }
-    
+
         NotificationCompat.Builder mBuilder =
                 new NotificationCompat.Builder(v2rayServicesListener.getService(), notificationChannelID);
         mBuilder.setSmallIcon(v2rayConfig.APPLICATION_ICON)
                 .setContentTitle(v2rayConfig.REMARK)
                 .setContentText("tap to open application")
-                .setContentIntent(notificationContentPendingIntent);
-        v2rayServicesListener.getService().startForeground(1, mBuilder.build());
+                .setContentIntent(notificationContentPendingIntent)
+                .setPriority(NotificationCompat.PRIORITY_LOW)
+                .setCategory(NotificationCompat.CATEGORY_SERVICE)
+                .setOngoing(true);
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            mBuilder.setChannelId(notificationChannelID);
+        }
+
+        Notification notification = mBuilder.build();
+        v2rayServicesListener.getService().startForeground(1, notification);
     }
 
     public boolean isV2rayCoreRunning() {
